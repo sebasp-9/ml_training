@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+import xgboost as xgb
 from sklearn.metrics import  accuracy_score, classification_report, confusion_matrix, f1_score
 from sklearn.preprocessing import LabelEncoder
-from xgboost import XGBClassifier
+
 
 # ==============================================================
 # 1. LOAD DATA
@@ -56,23 +57,24 @@ for col in cat_cols:
 # 3. MAP ATTACKS TO 5 CATEGORIES
 # ==============================================================
 
+# ⚠️ kept getting an error here, modified mappings from strings to int
 category_map = {
-    'normal': 'Normal',
+    'normal': 0,
     # DoS
-    'neptune': 'DoS', 'back': 'DoS', 'land': 'DoS', 'pod': 'DoS',
-    'smurf': 'DoS', 'teardrop': 'DoS', 'mailbomb': 'DoS', 'apache2': 'DoS',
-    'processtable': 'DoS', 'udpstorm': 'DoS', 'worm': 'DoS',
+    'neptune': 1, 'back': 1, 'land': 1, 'pod': 1,
+    'smurf': 1, 'teardrop': 1, 'mailbomb': 1, 'apache2': 1,
+    'processtable': 1, 'udpstorm': 1, 'worm': 1,
     # Probe
-    'satan': 'Probe', 'ipsweep': 'Probe', 'nmap': 'Probe', 'portsweep': 'Probe',
-    'mscan': 'Probe', 'saint': 'Probe',
+    'satan': 2, 'ipsweep': 2, 'nmap': 2, 'portsweep': 2,
+    'mscan': 2, 'saint': 2,
     # R2L
-    'warezclient': 'R2L', 'guess_passwd': 'R2L', 'ftp_write': 'R2L',
-    'imap': 'R2L', 'phf': 'R2L', 'multihop': 'R2L', 'warezmaster': 'R2L',
-    'spy': 'R2L', 'xlock': 'R2L', 'xsnoop': 'R2L', 'snmpguess': 'R2L',
-    'snmpgetattack': 'R2L', 'httptunnel': 'R2L', 'sendmail': 'R2L', 'named': 'R2L',
+    'warezclient': 3, 'guess_passwd': 3, 'ftp_write': 3,
+    'imap': 3, 'phf': 3, 'multihop': 3, 'warezmaster': 3,
+    'spy': 3, 'xlock': 3, 'xsnoop': 3, 'snmpguess': 3,
+    'snmpgetattack': 3, 'httptunnel': 3, 'sendmail': 3, 'named': 3,
     # U2R
-    'buffer_overflow': 'U2R', 'loadmodule': 'U2R', 'rootkit': 'U2R',
-    'perl': 'U2R', 'sqlattack': 'U2R', 'xterm': 'U2R', 'ps': 'U2R'
+    'buffer_overflow': 4, 'loadmodule': 4, 'rootkit': 4,
+    'perl': 4, 'sqlattack': 4, 'xterm': 4, 'ps': 4
 }
 
 df_full['category'] = df_full['class'].map(category_map).fillna('Other')
@@ -120,21 +122,15 @@ print(y_test.value_counts())
 # To compute macro F1:
 #   f1_score(y_test, y_pred, average='macro')
 
-"""
-assignment also specifies scale_pos_weight, how to utilize?
-- https://xgboost.readthedocs.io/en/stable/python/python_api.html
-- https://xgboosting.com/xgboost-configure-xgboost.train-parameters/
-- https://xgboosting.com/xgboost-configure-scale_pos_weight-parameter/
-"""
-model = XGBClassifier(
-    n_estimators=200,                       # 🧮 TUNE HERE
+model = xgb.XGBClassifier(
+    n_estimators=100,                       # 🧮 TUNE HERE
     max_depth=6,                            # 🧮 TUNE HERE
     learning_rate=0.1,                      # 🧮 TUNE HERE
     subsample=0.8,                          # 🧮 TUNE HERE
     colsample_bytree=0.8,
     objective="multi:softprob",             # for multiclass, think this is required for the dataset
     num_class = len(np.unique(y_train)),    # specify number of multiclass for above
-    eval_metric="logloss",                  # unsure on this parameter, maybe should be 'error'?
+    eval_metric="merror",                   # unsure on this parameter, code error specified ...
     random_state=42,                        # keep static for reproducibility, per assignment
     n_jobs=-1
 )
@@ -151,9 +147,10 @@ model.fit(
 y_pred = model.predict(x_test)
 
 # Evaluate
-print("Accuracy:", accuracy_score(y_test, y_pred))
+print("🎯 Accuracy:", accuracy_score(y_test, y_pred))
+print("📃 Classification Report:")
 print(classification_report(y_test, y_pred))
-print(f1_score(y_test, y_pred, average='macro'))
+print(f"🎖️ F1: {f1_score(y_test, y_pred, average='macro')}")
 
 # save model
 #model.save_model("xgboost_intrusion_model.json")
