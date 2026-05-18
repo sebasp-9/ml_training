@@ -23,7 +23,8 @@ Small tuning recommended from guide hit F1 of **0.565038356311371**
   - keep in mind that n_estimators interacts with other parameters, such as learning_rate, these parameters can be tuned together to achieve the best performance
 - `max_depth`[🔗](https://xgboosting.com/configure-xgboost-max_depth-parameter/): (default = 6) maximum depth of a tree in the model, influence the model’s complexity and its ability to generalize
 - `learning_rate`[🔗](https://xgboosting.com/configure-xgboost-learning_rate-parameter/): (0-1 inclusive, default = 0.3) controls the step size at each boosting iteration
-- `subsample`[](https://xgboosting.com/configure-xgboost-subsample-parameter/): (0-1 inclusive, default = 1) controls the fraction of observations used for each tree
+- `subsample`[🔗](https://xgboosting.com/configure-xgboost-subsample-parameter/): (0-1 inclusive, default = 1) controls the fraction of observations used for each tree
+- `scale_pos_weight`[🔗](https://xgboosting.com/xgboost-configure-scale_pos_weight-parameter/): calculate for imbalanced datasets
 
 # TODO
 1. [ ] Implement `scale_pos_weight`
