@@ -120,7 +120,7 @@ y_test = df_test_processed['category']
 # calculate the scale_pos_weight
 # taken directly from documentation, I don't think this is currently modeled correctly, needs more investigation
 # is it y0 / (y1 + y2 + y3 + y4)?
-#scale_pos_weight = len(y_train[y_train == 0]) / len(y_train[y_train == 1])
+scale_pos_weight = len(y_train[y_train == 0]) / (len(y_train[y_train == 1]) + len(y_train[y_train == 2]) + len(y_train[y_train == 3]) + len(y_train[y_train == 4]))
 
 n_estimators = int(args.n_estimators)
 max_depth = int(args.max_depth)
@@ -133,10 +133,10 @@ model = xgb.XGBClassifier(
     learning_rate=learning_rate,         # 🔧
     subsample=subsample,                 # 🔧
     colsample_bytree=0.8,
-#    scale_pos_weight=scale_pos_weight,   # 🔧
-    objective="multi:softprob",          # for multiclass, think this is required for the dataset
+    scale_pos_weight=scale_pos_weight,   # 🔧
+    objective='multi:softprob',          # for multiclass, think this is required for the dataset
     num_class = len(np.unique(y_train)), # specify number of multiclass for above
-    eval_metric="merror",                # unsure on this parameter ...
+    eval_metric='merror',                # unsure on this parameter ...
     random_state=42,                     # keep static for reproducibility, per assignment
     n_jobs=-1
 )
