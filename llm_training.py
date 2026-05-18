@@ -1,14 +1,18 @@
+import argparse
 import numpy as np
 import pandas as pd
 import xgboost as xgb
 from sklearn.metrics import  accuracy_score, classification_report, confusion_matrix, f1_score
 from sklearn.preprocessing import LabelEncoder
 
+parser = argparse.ArgumentParser(prog='llm_training', description="implements XGBoost to train network intrusion detection")
+parser.add_argument('-n_estimators', '-n', default=100, help="number of trees in model")
+parser.add_argument('-max_depth', '-d', default=6, help="maximum depth of model trees")
+parser.add_argument('-learning_rate', '-l', default=0.3, help="(0-1) step size of each boost iteration")
+parser.add_argument('-subsample', '-s', default=1, help="(0-1) fraction of observation on each tree")
+args = parser.parse_args()
 
-# ==============================================================
-# 1. LOAD DATA
-# ==============================================================
-
+# load data -----------------------------------------------------------------------------------------------------------
 TRAIN_DATA = 'KDDTrain+.txt'
 TEST_DATA = 'KDDTest+.txt'
 
@@ -26,7 +30,7 @@ columns = [
     'dst_host_srv_rerror_rate', 'class', 'level'
 ]
 
-print("Loading data...")
+print("🚚 Loading data...")
 df_train = pd.read_csv(TRAIN_DATA, names=columns)
 df_test = pd.read_csv(TEST_DATA, names=columns)
 
@@ -34,13 +38,10 @@ df_test = pd.read_csv(TEST_DATA, names=columns)
 df_train.drop(columns=['level'], inplace=True)
 df_test.drop(columns=['level'], inplace=True)
 
-print(f"Training set: {df_train.shape[0]} records, {df_train.shape[1]} columns")
-print(f"Test set:     {df_test.shape[0]} records, {df_test.shape[1]} columns")
+#print(f"Training set: {df_train.shape[0]} records, {df_train.shape[1]} columns")
+#print(f"Test set:     {df_test.shape[0]} records, {df_test.shape[1]} columns")
 
-# ==============================================================
-# 2. ENCODE CATEGORICAL FEATURES
-# ==============================================================
-
+# encode categorical features -----------------------------------------------------------------------------------------
 # Merge temporarily to ensure consistent encoding across train and test
 df_full = pd.concat([df_train, df_test])
 
@@ -53,10 +54,7 @@ for col in cat_cols:
     df_full[col] = le.fit_transform(df_full[col])
     label_encoders[col] = le
 
-# ==============================================================
-# 3. MAP ATTACKS TO 5 CATEGORIES
-# ==============================================================
-
+# map attacks to categories -------------------------------------------------------------------------------------------
 # ⚠️ kept getting an error here, modified mappings from strings to int
 category_map = {
     'normal': 0,
@@ -79,10 +77,7 @@ category_map = {
 
 df_full['category'] = df_full['class'].map(category_map).fillna('Other')
 
-# ==============================================================
-# 4. PREPARE FEATURES AND LABELS
-# ==============================================================
-
+# prepare features and labels -----------------------------------------------------------------------------------------
 # Drop constant column and original class labels
 df_full.drop(columns=['num_outbound_cmds', 'class'], inplace=True)
 
@@ -97,11 +92,11 @@ y_train = df_train_processed['category']
 x_test = df_test_processed.drop(columns=['category'])
 y_test = df_test_processed['category']
 
-print(f"\nFeatures: {x_train.shape[1]}")
-print(f"\nTraining set class distribution:")
-print(y_train.value_counts())
-print(f"\nTest set class distribution:")
-print(y_test.value_counts())
+#print(f"\nFeatures: {x_train.shape[1]}")
+#print(f"\nTraining set class distribution:")
+#print(y_train.value_counts())
+#print(f"\nTest set class distribution:")
+#print(y_test.value_counts())
 
 # ==============================================================
 # YOUR WORK STARTS HERE
@@ -122,16 +117,27 @@ print(y_test.value_counts())
 # To compute macro F1:
 #   f1_score(y_test, y_pred, average='macro')
 
+# calculate the scale_pos_weight
+# taken directly from documentation, I don't think this is currently modeled correctly, needs more investigation
+# is it y0 / (y1 + y2 + y3 + y4)?
+#scale_pos_weight = len(y_train[y_train == 0]) / len(y_train[y_train == 1])
+
+n_estimators = int(args.n_estimators)
+max_depth = int(args.max_depth)
+learning_rate = float(args.learning_rate)
+subsample = float(args.subsample)
+
 model = xgb.XGBClassifier(
-    n_estimators=100,                       # 🧮 TUNE HERE
-    max_depth=6,                            # 🧮 TUNE HERE
-    learning_rate=0.1,                      # 🧮 TUNE HERE
-    subsample=0.8,                          # 🧮 TUNE HERE
+    n_estimators=n_estimators,           # 🔧
+    max_depth=max_depth,                 # 🔧
+    learning_rate=learning_rate,         # 🔧
+    subsample=subsample,                 # 🔧
     colsample_bytree=0.8,
-    objective="multi:softprob",             # for multiclass, think this is required for the dataset
-    num_class = len(np.unique(y_train)),    # specify number of multiclass for above
-    eval_metric="merror",                   # unsure on this parameter, code error specified ...
-    random_state=42,                        # keep static for reproducibility, per assignment
+#    scale_pos_weight=scale_pos_weight,   # 🔧
+    objective="multi:softprob",          # for multiclass, think this is required for the dataset
+    num_class = len(np.unique(y_train)), # specify number of multiclass for above
+    eval_metric="merror",                # unsure on this parameter ...
+    random_state=42,                     # keep static for reproducibility, per assignment
     n_jobs=-1
 )
 
@@ -146,11 +152,13 @@ model.fit(
 # predict
 y_pred = model.predict(x_test)
 
-# Evaluate
+# evaluate
+print(f"\n🎛️ Parameters: n_estimators={args.n_estimators}, max_depth={args.max_depth}, learning_rate={args.learning_rate}, subsample={args.subsample}")
 print("🎯 Accuracy:", accuracy_score(y_test, y_pred))
 print("📃 Classification Report:")
+print("⮡  legend: 0=Normal, 1=DoS, 2=Probe, 3=R2L, 4=U2R\n")
 print(classification_report(y_test, y_pred))
-print(f"🎖️ F1: {f1_score(y_test, y_pred, average='macro')}")
+print(f"🎖️ F1: \033[92m{f1_score(y_test, y_pred, average='macro')}\033[0m\n")
 
 # save model
-#model.save_model("xgboost_intrusion_model.json")
+#model.save_model("intrusion_model.json")
