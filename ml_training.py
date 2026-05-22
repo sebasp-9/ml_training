@@ -1,9 +1,28 @@
 import argparse
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import xgboost as xgb
 from sklearn.metrics import  accuracy_score, classification_report, confusion_matrix, f1_score
+from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import LabelEncoder
+
+
+def create_confusion_matrix(y_test, y_pred):
+    # did not work with expected labels, changed to adjusted labels of category_map
+    labels = ["0", "1", "2", "3", "4"]
+    cm = confusion_matrix(y_test, y_pred, labels=labels)
+
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=labels, yticklabels=labels)
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
+    plt.tight_layout()
+    plt.savefig("confusion_matrix.png", dpi=150)
+    #plt.show()
+
 
 parser = argparse.ArgumentParser(prog='llm_training', description="implements XGBoost to train network intrusion detection")
 parser.add_argument('-n_estimators', '-n', default=100, help="number of trees in model")
@@ -55,7 +74,7 @@ for col in cat_cols:
     label_encoders[col] = le
 
 # map attacks to categories -------------------------------------------------------------------------------------------
-# ⚠️ kept getting an error here, modified mappings from strings to int
+# ⚠️ kept getting an error here, modified mappings from strings to int for XGBoost
 category_map = {
     'normal': 0,
     # DoS
@@ -133,7 +152,7 @@ model = xgb.XGBClassifier(
     learning_rate=learning_rate,         # 🔧
     subsample=subsample,                 # 🔧
     colsample_bytree=0.8,
-    scale_pos_weight=scale_pos_weight,   # 🔧
+    #scale_pos_weight=scale_pos_weight,   # 🔧
     objective='multi:softprob',          # for multiclass, think this is required for the dataset
     num_class = len(np.unique(y_train)), # specify number of multiclass for above
     eval_metric='merror',                # unsure on this parameter ...
@@ -158,7 +177,12 @@ print("🎯 Accuracy:", accuracy_score(y_test, y_pred))
 print("📃 Classification Report:")
 print("⮡  legend: 0=Normal, 1=DoS, 2=Probe, 3=R2L, 4=U2R\n")
 print(classification_report(y_test, y_pred))
-print(f"🎖️ F1: \033[92m{f1_score(y_test, y_pred, average='macro')}\033[0m\n")
+print(f"🎖️ F1:  \033[92m{f1_score(y_test, y_pred, average='macro')}\033[0m\n")
+
+scores = cross_val_score(model, x_train, y_train, cv=5, scoring='f1_macro')
+print(f"🔀 Val: \033[95m{scores.mean():.4f} (± {scores.std():.4f})\033[0m\n")
+
+create_confusion_matrix(y_test, y_pred)
 
 # save model
 #model.save_model("intrusion_model.json")
