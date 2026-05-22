@@ -5,13 +5,13 @@
 - xgboost
 
 # Notes
-Initial run hit F1 of **0.5387741259669531**
+Initial run hit F1 of ** 0.5600200543620495**
 - n_estimators=100
 - max_depth=6
 - learning_rate=0.3
 - subsample=1
 
-Small tuning recommended from guide hit F1 of **0.565038356311371**
+Small tuning recommended from guide hit F1 of **0.5741628324208399**
 - n_estimators=200
 - max_depth=6
 - learning_rate=0.1

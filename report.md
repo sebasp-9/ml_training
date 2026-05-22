@@ -48,36 +48,36 @@ Always document experiments you ran. Fill in the summary table will all the expe
 ### Experiment 1: [Name / description]
 
 - **Algorithm:**  XGBoost
-- **What changed from baseline:** This is our own baseline run with default parameters
-- **Macro F1 (CV):** [cross-validation score]
-- **Macro F1 (test):** [KDDTest+ score]
+- **What changed from baseline:** Our own baseline run with default parameters (n_estimators=100, max_depth=6, learning_rate=0.3, subsample=1)
+- **Macro F1 (CV):**  0.9447 (± 0.0127)
+- **Macro F1 (test):**  0.5600200543620495
 - **Observation:**  Already beats the Random Forest baseline of 0.47. However R2L and U2R detection is still poor due to class imbalance.
 
 ### Experiment 2: [Name / description]
 
 - **Algorithm:** XGBoost
 - **What changed:** Increased n_estimators to 200, reduced learning_rate to 0.1, reduced subsample to 0.8
-- **Macro F1 (CV):**
-- **Macro F1 (test):**
+- **Macro F1 (CV):** 0.9433 (± 0.0180)
+- **Macro F1 (test):** 0.5741628324208399
 - **Observation:** Small but consistent improvement. Lower learning rate with more trees generalizes better.
 
 ### Experiment 3: [Name / description]
 
-- **Algorithm:**
-- **What changed:**
-- **Macro F1 (CV):**
-- **Macro F1 (test):**
-- **Observation:**
+- **Algorithm:** XGBoost + SMOTE
+- **What changed:** Applied SMOTE oversampling to the training data before training (default model params: n_estimators=100, max_depth=6, learning_rate=0.3, subsample=1). SMOTE raised every class to 67,343 training examples.
+- **Macro F1 (CV):** 0.9998 (± 0.0001)
+- **Macro F1 (test):** 0.6320434249728675
+- **Observation:** Best result so far. R2L recall improved from 0.05 to 0.16 and U2R recall from 0.16 to 0.25. The near-perfect CV score (0.9998) is misleading — it happens because SMOTE's synthetic samples leak across cross-validation folds, so CV is not a reliable estimate here.
 
 ### Experiments Summary
 
-| # | Description | Algorithm | Imbalance Handling | Macro F1 (CV) | Macro F1 (test) |
-|---|-------------|-----------|--------------------|---------------|-----------------|
-| 1 |             |           |                    |               |                 |
-| 2 |             |           |                    |               |                 |
-| 3 |             |           |                    |               |                 |
-| 4 |             |           |                    |               |                 |
-| 5 |             |           |                    |               |                 |
+| # | Description            | Algorithm       | Imbalance Handling | Macro F1 (CV) | Macro F1 (test)    |
+|---|------------------------|-----------------|--------------------|---------------|--------------------|
+| 1 | Default params         | XGBoost         |                    | 0.9447        | 0.5600200543620495 |
+| 2 | Tuned params           | XGBoost         |                    | 0.9433        | 0.5741628324208399 |
+| 3 | SMOTE + default params | XGBoost + SMOTE |                    | 0.9998        | 0.6320434249728675 |
+| 4 |                        |                 |                    |               |                    |
+| 5 |                        |                 |                    |               |                    |
 
 ---
 

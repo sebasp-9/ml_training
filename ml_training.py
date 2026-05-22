@@ -146,6 +146,19 @@ max_depth = int(args.max_depth)
 learning_rate = float(args.learning_rate)
 subsample = float(args.subsample)
 
+# --- SMOTE: generate synthetic examples for rare classes (R2L, U2R) ---
+from imblearn.over_sampling import SMOTE
+
+print("\n🧪 Applying SMOTE to balance training data...")
+print("Before SMOTE:")
+print(y_train.value_counts())
+
+smote = SMOTE(random_state=42, k_neighbors=5)
+x_train, y_train = smote.fit_resample(x_train, y_train)
+
+print("\nAfter SMOTE:")
+print(y_train.value_counts())
+
 model = xgb.XGBClassifier(
     n_estimators=n_estimators,           # 🔧
     max_depth=max_depth,                 # 🔧
