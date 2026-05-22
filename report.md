@@ -24,10 +24,10 @@ Briefly describe your overall strategy. What was your plan before you started ex
 
 Describe any changes you made to the data beyond the starter code:
 
-- **Feature engineering:** [Did you create new features? Which ones and why?]
-- **Feature selection:** [Did you remove any features? Based on what criteria?]
-- **Scaling:** [Did you apply StandardScaler, MinMaxScaler, or none?]
-- **Other:** [Any other preprocessing steps?]
+- **Feature engineering:** None applied beyond starter code
+- **Feature selection:** Dropped num_outbound_cmds 
+- **Scaling:** None applied,XGBoost does not require feature scaling
+- **Other:** Categorical features (protocol_type, service, flag) were label encoded. Attack types were mapped to 5 numeric categories (0=Normal, 1=DoS, 2=Probe, 3=R2L, 4=U2R)
 
 ### 1.3 Class Imbalance Handling
 
@@ -47,19 +47,19 @@ Always document experiments you ran. Fill in the summary table will all the expe
 
 ### Experiment 1: [Name / description]
 
-- **Algorithm:** [e.g., Random Forest with default parameters]
-- **What changed from baseline:** [e.g., "Nothing — this is our own baseline run"]
+- **Algorithm:**  XGBoost
+- **What changed from baseline:** This is our own baseline run with default parameters
 - **Macro F1 (CV):** [cross-validation score]
 - **Macro F1 (test):** [KDDTest+ score]
-- **Observation:** [what did you learn from this experiment?]
+- **Observation:**  Already beats the Random Forest baseline of 0.47. However R2L and U2R detection is still poor due to class imbalance.
 
 ### Experiment 2: [Name / description]
 
-- **Algorithm:**
-- **What changed:** [e.g., "Added SMOTE before training"]
+- **Algorithm:** XGBoost
+- **What changed:** Increased n_estimators to 200, reduced learning_rate to 0.1, reduced subsample to 0.8
 - **Macro F1 (CV):**
 - **Macro F1 (test):**
-- **Observation:**
+- **Observation:** Small but consistent improvement. Lower learning rate with more trees generalizes better.
 
 ### Experiment 3: [Name / description]
 
@@ -139,7 +139,7 @@ Always document experiments you ran. Fill in the summary table will all the expe
 
 ## Appendix: Environment
 
-- **Hardware:** i7-11800H, 16GB, NVIDIA T1200
+- **Hardware:** i7-11800H, 16GB, NVIDIA T1200 - Ryzen-9 9955HX, RTX 5060 8GB
 - **Python version:** 3.14.5
 - **Key libraries:** [scikit-learn version, xgboost version, etc.]
 - **Random seed:** 42
