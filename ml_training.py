@@ -11,18 +11,30 @@ from sklearn.preprocessing import LabelEncoder
 
 def create_confusion_matrix(y_test, y_pred):
     # did not work with expected labels, changed to adjusted labels of category_map
-    labels = ["0", "1", "2", "3", "4"]
+    #labels = ["0", "1", "2", "3", "4"]
+    #cm = confusion_matrix(y_test, y_pred, labels=labels)
+
+    #plt.figure(figsize=(8, 6))
+    #sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=labels, yticklabels=labels)
+    #plt.xlabel("Predicted")
+    #plt.ylabel("Actual")
+    #plt.title("Confusion Matrix")
+    #plt.tight_layout()
+    #plt.savefig("confusion_matrix.png", dpi=150)
+    #plt.show()
+    labels = [0, 1, 2, 3, 4]
+    display_labels = ["Normal", "DoS", "Probe", "R2L", "U2R"]
     cm = confusion_matrix(y_test, y_pred, labels=labels)
 
     plt.figure(figsize=(8, 6))
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=labels, yticklabels=labels)
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                xticklabels=display_labels, yticklabels=display_labels)
     plt.xlabel("Predicted")
     plt.ylabel("Actual")
     plt.title("Confusion Matrix")
     plt.tight_layout()
     plt.savefig("confusion_matrix.png", dpi=150)
-    #plt.show()
-
+    # plt.show()
 
 parser = argparse.ArgumentParser(prog='llm_training', description="implements XGBoost to train network intrusion detection")
 parser.add_argument('-n_estimators', '-n', default=100, help="number of trees in model")
