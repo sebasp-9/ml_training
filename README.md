@@ -17,6 +17,14 @@ Small tuning recommended from guide hit F1 of **0.5741628324208399**
 - learning_rate=0.1
 - subsample=0.8
 
+
+-Our CV score (~0.99) is much higher than our test score (~0.64). 
+We think this is because we applied SMOTE to the whole training set 
+before cross-validation. The synthetic examples ended up in both the 
+training and validation folds, so the model was effectively tested on 
+data very similar to what it trained on. This made the CV score 
+unrealistically high. The test score on KDDTest+ is the reliable measure 
+of how well our model actually performs.
 ## Parameters
 - `n_estimators`[🔗](https://xgboosting.com/configure-xgboost-n_estimators-parameter/): (recommended start = 100) number of trees (estimators) in the model, allowing you to control the model’s complexity and performance
   - start with a moderate value for n_estimators (e.g., 100) and adjust it based on the model’s performance and computational constraints
