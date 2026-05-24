@@ -1,4 +1,4 @@
-# Assignment Report Example
+# Network Intrusion Detection - Assignment Report
 
 ---
 
