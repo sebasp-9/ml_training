@@ -8,7 +8,7 @@
 
 **Date:** 25.05.2026
 
-Repository link: https://gitlab.cs.ttu.ee/austid/ml_training
+Repository link: https://gitlab.cs.ttu.ee/austid/ml_training (please email me at austid@taltech.ee if you can't access the repository, it should be visible to all internal accounts)
 
 ---
 
@@ -16,9 +16,7 @@ Repository link: https://gitlab.cs.ttu.ee/austid/ml_training
 
 ### 1.1 Strategy Overview
 
-Briefly describe your overall strategy. What was your plan before you started experimenting? Probably none, but you may write so as well.
-
-[Your strategy — e.g., "We decided to focus on improving R2L/U2R detection using SMOTE and gradient boosting."]
+We started by identifying the library with the most examples and best documentation which seemed to point towards XGBoost. Once we had a working implementation and F1 scores in the 54-58 range we moved on to implementing SMOTE which immediately saw a boost of ~10 on F1.
 
 ### 1.2 Preprocessing
 
@@ -33,17 +31,15 @@ Describe any changes you made to the data beyond the starter code:
 
 How did you address the imbalance between classes?
 
-- **Method used:** [SMOTE / class_weight / undersampling / combination / none]
-- **Parameters:** [e.g., SMOTE with k_neighbors=5, or class_weight='balanced']
-- **Effect on training set distribution:** [how did the class distribution change?]
+- **Method used:** SMOTE
+- **Parameters:** k_neighbors=5
+- **Effect on training set distribution:** Went from heavily imbalanced Normal > DoS > Probe > R2L > U2R to more even distribution across all.
 
 ---
 
 ## 2. Experiments
 
-Always document experiments you ran. Fill in the summary table will all the experiments. Add the descriptions for the ones you find important.
-
-### Total number of experiments:
+### Total number of experiments: 5
 
 ### Experiment 1:  Default params
 
@@ -75,6 +71,13 @@ Always document experiments you ran. Fill in the summary table will all the expe
 - **Macro F1 (test):** 0.6415187059675862
 - **Observation:** Best result so far. Combining SMOTE with tuned parameters improved the test macro F1 over both the no-SMOTE runs and the SMOTE+default run. R2L recall reached 0.18 and U2R recall 0.31. The CV score (0.9997) remains inflated due to SMOTE samples leaking across cross-validation folds.
 
+### Experiment 5: SMOTE + fine-tuning
+- **Algorithm:** XGBoost + SMOTE
+- **What changed:** More fine-tuning parameters with smaller adjustments applied in sets of parameters to observe interactions (python ml_training.py -n 200 -d 4 -l 0.08 -s 0.95)
+- **Macro F1 (CV):** 0.9992 (± 0.0002)
+- **Macro F1 (test):** 0.6630232649262691
+- **Observation:** Best overall result combining adjustments across all parameters. Reducing learning rate from 0.1 to 0.05 showed improvement while adjusting back up to 0.08 feels like it provided the best granularity. Surprisingly n_estimators remained most effective at around 200.
+
 ### Experiments Summary
 
 | # | Description            | Algorithm        | Imbalance Handling | Macro F1 (CV) | Macro F1 (test)     |
@@ -83,7 +86,7 @@ Always document experiments you ran. Fill in the summary table will all the expe
 | 2 | Tuned params           | XGBoost          |                    | 0.9433        | 0.5741628324208399  |
 | 3 | SMOTE + default params | XGBoost + SMOTE  |                    | 0.9998        | 0.6320434249728675  |
 | 4 | SMOTE + tuned params   | XGBoost + SMOTE  |                    | 0.9997        | 0.6415187059675862  |
-| 5 |                        |                  |                    |               |                     |
+| 5 | SMOTE + fine-tuning    | XGBoost + SMOTE  |                    | 0.9992        | 0.6630232649262691  |
 
 ---
 
@@ -91,31 +94,31 @@ Always document experiments you ran. Fill in the summary table will all the expe
 
 ### 3.1 Best Model
 
-- **Algorithm:** [e.g., XGBoost]
-- **Key parameters:** [e.g., n_estimators=200, max_depth=6, learning_rate=0.1, scale_pos_weight=...]
-- **Imbalance handling:** [e.g., SMOTE + class_weight]
-- **Feature engineering:** [e.g., added src_bytes/dst_bytes ratio]
+- **Algorithm:** XGBoost
+- **Key parameters:** n_estimators=200, max_depth=4, learning_rate=0.08, subsample=0.95
+- **Imbalance handling:** SMOTE
+- **Feature engineering:** None
 
 ### 3.2 Final Macro F1-Score
 
-| Metric              | Score |
-|---------------------|-------|
-| **Macro F1 (test)** |       |
-| Macro F1 (CV)       |       |
+| Metric              | Score              |
+|---------------------|--------------------|
+| **Macro F1 (test)** | 0.6630232649262691 |
+| Macro F1 (CV)       | 0.9992 (± 0.0002)  |
 
 ### 3.3 Classification Report
 
 | Category | Precision | Recall | F1-Score | Support |
 |----------|-----------|--------|----------|---------|
-| Normal   |           |        |          |         |
-| DoS      |           |        |          |         |
-| Probe    |           |        |          |         |
-| R2L      |           |        |          |         |
-| U2R      |           |        |          |         |
+| Normal   | 0.72      | 0.97   | 0.82     | 9711    |
+| DoS      | 0.96      | 0.83   | 0.89     | 7460    |
+| Probe    | 0.83      | 0.79   | 0.81     | 2421    |
+| R2L      | 0.98      | 0.20   | 0.33     | 2885    |
+| U2R      | 0.52      | 0.40   | 0.45     | 67      |
 
 ### 3.4 Confusion Matrix
 
-[Generate this image using the code from Section 9 of the guidebook. For Markdown report save it as `confusion_matrix.png` in the same folder as this report and add link `![Confusion Matrix](confusion_matrix.png)`. Don’t forget the exclamation mark].
+![Confusion Matrix](confusion_matrix.png)
 
 ## 4. Cross-Validation vs. Test Score
 
@@ -131,15 +134,15 @@ Always document experiments you ran. Fill in the summary table will all the expe
 
 ### What had the biggest positive impact?
 
-[e.g., "SMOTE increased R2L recall from 0.00 to 0.12, which raised macro F1 by 0.08"]
+SMOTE raised macro F1 score by ~10 running with the same parameters.
 
 ### What surprisingly didn't help?
 
-[e.g., "Feature selection with SelectKBest removed 15 features but macro F1 dropped — the removed features contained information useful for rare classes"]
+Setting higher n_estimators rarely helped. Setting 200 over 100 had small gains as anything less seemed to be too few rounds however it quickly fell off again with even 300-400 dropping overall.
 
 ### What would you try with more time?
 
-[e.g., "Stacking ensemble, more aggressive hyperparameter tuning, deeper feature engineering"]
+Deeper feature engineering; we were never able to successfully implement scale_pos_weight as it was always disregarded during model training.
 
 ---
 
@@ -147,5 +150,5 @@ Always document experiments you ran. Fill in the summary table will all the expe
 
 - **Hardware:** i7-11800H, 16GB, NVIDIA T1200 - Ryzen-9 9955HX, RTX 5060 8GB
 - **Python version:** 3.14.5
-- **Key libraries:** [scikit-learn version, xgboost version, etc.]
+- **Key libraries:** xgboost, sklearn
 - **Random seed:** 42
