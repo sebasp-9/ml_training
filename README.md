@@ -18,13 +18,12 @@ Small tuning recommended from guide hit F1 of **0.5741628324208399**
 - subsample=0.8
 
 
--Our CV score (~0.99) is much higher than our test score (~0.64). 
+-Our CV score (~0.99) is higher than our test score (~0.64). 
 We think this is because we applied SMOTE to the whole training set 
 before cross-validation. The synthetic examples ended up in both the 
-training and validation folds, so the model was effectively tested on 
-data very similar to what it trained on. This made the CV score 
-unrealistically high. The test score on KDDTest+ is the reliable measure 
-of how well our model actually performs.
+training and validation folds, so the model was tested on 
+data very similar to what it trained on. This made the CV score high.
+
 ## Parameters
 - `n_estimators`[🔗](https://xgboosting.com/configure-xgboost-n_estimators-parameter/): (recommended start = 100) number of trees (estimators) in the model, allowing you to control the model’s complexity and performance
   - start with a moderate value for n_estimators (e.g., 100) and adjust it based on the model’s performance and computational constraints
@@ -35,7 +34,7 @@ of how well our model actually performs.
 - `scale_pos_weight`[🔗](https://xgboosting.com/xgboost-configure-scale_pos_weight-parameter/): calculate for imbalanced datasets
 
 # TODO
-1. [ ] Implement `scale_pos_weight`
-2. [ ] Implement confusion matrix
-3. [ ] Organize code
+1. [] Implement `scale_pos_weight`
+2. [X] Implement confusion matrix
+3. [X] Organize code
 4. [X] Turn parameters into arguments for easy testing

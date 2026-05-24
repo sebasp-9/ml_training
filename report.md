@@ -82,11 +82,11 @@ How did you address the imbalance between classes?
 
 | # | Description            | Algorithm        | Imbalance Handling | Macro F1 (CV) | Macro F1 (test)     |
 |---|------------------------|------------------|--------------------|---------------|---------------------|
-| 1 | Default params         | XGBoost          |                    | 0.9447        | 0.5600200543620495  |
-| 2 | Tuned params           | XGBoost          |                    | 0.9433        | 0.5741628324208399  |
-| 3 | SMOTE + default params | XGBoost + SMOTE  |                    | 0.9998        | 0.6320434249728675  |
-| 4 | SMOTE + tuned params   | XGBoost + SMOTE  |                    | 0.9997        | 0.6415187059675862  |
-| 5 | SMOTE + fine-tuning    | XGBoost + SMOTE  |                    | 0.9992        | 0.6630232649262691  |
+| 1 | Default params         | XGBoost          | None               | 0.9447        | 0.5600200543620495  |
+| 2 | Tuned params           | XGBoost          | None               | 0.9433        | 0.5741628324208399  |
+| 3 | SMOTE + default params | XGBoost + SMOTE  | SMOTE              | 0.9998        | 0.6320434249728675  |
+| 4 | SMOTE + tuned params   | XGBoost + SMOTE  | SMOTE              | 0.9997        | 0.6415187059675862  |
+| 5 | SMOTE + fine-tuning    | XGBoost + SMOTE  | SMOTE              | 0.9992        | 0.6630232649262691  |
 
 ---
 
@@ -122,13 +122,11 @@ How did you address the imbalance between classes?
 
 ## 4. Cross-Validation vs. Test Score
 
-- **CV macro F1:** [score ± std]
-- **Test macro F1:** [score]
-- **Gap:** [CV − test]
+- **CV macro F1:**  0.9992 (± 0.0002)
+- **Test macro F1:** 0.6630232649262691
+- **Gap:** 0.3361767350737309
 
-**Analysis:** [Explain the gap. Is it expected? Is it due to unseen attack types in KDDTest+? Does it indicate overfitting?]
-
----
+**Analysis:** Our CV score is higher than our test score. This is because we applied SMOTE to the whole training set before cross-validation, so the synthetic examples ended up in both the training and validation folds, the model was tested on data very similar to what it trained on, so this inflated the CV score. Some gap is also expected because KDDTest+ contains attack types not present in the training data.
 
 ## 5. What Worked and What Didn't
 

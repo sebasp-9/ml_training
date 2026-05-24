@@ -160,15 +160,15 @@ print("\nAfter SMOTE:")
 print(y_train.value_counts())
 
 model = xgb.XGBClassifier(
-    n_estimators=n_estimators,           # 🔧
-    max_depth=max_depth,                 # 🔧
-    learning_rate=learning_rate,         # 🔧
-    subsample=subsample,                 # 🔧
+    n_estimators=n_estimators,
+    max_depth=max_depth,
+    learning_rate=learning_rate,
+    subsample=subsample,
     colsample_bytree=0.8,
-    #scale_pos_weight=scale_pos_weight,   # 🔧
-    objective='multi:softprob',          # for multiclass, think this is required for the dataset
+    #scale_pos_weight=scale_pos_weight,
+    objective='multi:softprob',          # for multiclass, dataset
     num_class = len(np.unique(y_train)), # specify number of multiclass for above
-    eval_metric='merror',                # unsure on this parameter ...
+    eval_metric='merror',
     random_state=42,                     # keep static for reproducibility, per assignment
     n_jobs=-1
 )
